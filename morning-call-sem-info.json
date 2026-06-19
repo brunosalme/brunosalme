@@ -1,0 +1,283 @@
+{
+  "_comment": "Nós para adicionar ao workflow Morning Call — ramo FALSE do IF Dia Útil?",
+  "_element_ids": {
+    "data": "PBzhcrRlvpk5TFph-LBYScmwT0BpcHHTQ",
+    "dica": "PBzhcrRlvpk5TFph-LBNmnCDwzDG70SrJ"
+  },
+  "nodes": [
+    {
+      "parameters": {
+        "jsCode": "const data = $input.first().json;\nconst feriado = data.feriado;\nconst date = data.date;\n\nconst d = new Date(date + 'T09:00:00');\nconst meses = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];\nconst dataFormatada = `${d.getDate()} de ${meses[d.getMonth()]} de ${d.getFullYear()} às 09:00`;\n\nconst contexto = feriado\n  ? `Hoje é feriado: ${feriado}.`\n  : d.getDay() === 0\n  ? 'Hoje é domingo.'\n  : 'Hoje é sábado.';\n\nreturn [{ json: { dataFormatada, contexto, date } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1584, 4960],
+      "id": "sem-info-01",
+      "name": "Formata Data PT-BR"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.anthropic.com/v1/messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "x-api-key", "value": "={{ $vars.ANTHROPIC_API_KEY }}" },
+            { "name": "anthropic-version", "value": "2023-06-01" },
+            { "name": "content-type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"claude-haiku-4-5-20251001\",\n  \"max_tokens\": 80,\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"{{ $json.contexto }} Gere UMA dica curta, engraçada e bem-humorada para quem não vai trabalhar hoje. Máximo 12 palavras. Comece com 'Dica:'. Sem aspas.\"\n    }\n  ]\n}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [1808, 4960],
+      "id": "sem-info-02",
+      "name": "Claude: Gera Dica"
+    },
+    {
+      "parameters": {
+        "jsCode": "const claudeResp = $input.first().json;\nconst formataData = $('Formata Data PT-BR').first().json;\n\nconst dica = claudeResp.content[0].text.trim();\n\nreturn [{\n  json: {\n    dataFormatada: formataData.dataFormatada,\n    dica\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2032, 4960],
+      "id": "sem-info-03",
+      "name": "Extrai Dica"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.canva.com/rest/v1/designs",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "={{ 'Bearer ' + $vars.CANVA_ACCESS_TOKEN }}" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"design_type\": {\n    \"type\": \"brand_template\",\n    \"brand_template_id\": \"EAHNCayVMQo\"\n  }\n}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [2256, 4960],
+      "id": "sem-info-04",
+      "name": "Canva: Criar Design"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://api.canva.com/rest/v1/designs/{{ $json.design.id }}/editing-sessions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "={{ 'Bearer ' + $vars.CANVA_ACCESS_TOKEN }}" }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [2480, 4960],
+      "id": "sem-info-05",
+      "name": "Canva: Iniciar Edição"
+    },
+    {
+      "parameters": {
+        "jsCode": "const session = $input.first().json;\nconst dica = $('Extrai Dica').first().json;\nconst design = $('Canva: Criar Design').first().json;\n\nreturn [{\n  json: {\n    design_id: design.design.id,\n    session_id: session.editing_session.editing_session_id,\n    dataFormatada: dica.dataFormatada,\n    dica: dica.dica\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2704, 4960],
+      "id": "sem-info-06",
+      "name": "Monta Contexto Edição"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://api.canva.com/rest/v1/designs/{{ $json.design_id }}/editing-sessions/{{ $json.session_id }}/commands",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "={{ 'Bearer ' + $vars.CANVA_ACCESS_TOKEN }}" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"commands\": [\n    {\n      \"type\": \"replace_text\",\n      \"element_id\": \"PBzhcrRlvpk5TFph-LBYScmwT0BpcHHTQ\",\n      \"replacement\": \"{{ $json.dataFormatada }}\"\n    },\n    {\n      \"type\": \"replace_text\",\n      \"element_id\": \"PBzhcrRlvpk5TFph-LBNmnCDwzDG70SrJ\",\n      \"replacement\": \"{{ $json.dica }}\"\n    }\n  ]\n}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [2928, 4960],
+      "id": "sem-info-07",
+      "name": "Canva: Editar Textos"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://api.canva.com/rest/v1/designs/{{ $('Monta Contexto Edição').first().json.design_id }}/editing-sessions/{{ $('Monta Contexto Edição').first().json.session_id }}/publish",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "={{ 'Bearer ' + $vars.CANVA_ACCESS_TOKEN }}" }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [3152, 4960],
+      "id": "sem-info-08",
+      "name": "Canva: Commit Edição"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.canva.com/rest/v1/exports",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "={{ 'Bearer ' + $vars.CANVA_ACCESS_TOKEN }}" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"design_id\": \"{{ $('Monta Contexto Edição').first().json.design_id }}\",\n  \"format\": {\n    \"type\": \"png\",\n    \"export_quality\": \"pro\"\n  }\n}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [3376, 4960],
+      "id": "sem-info-09",
+      "name": "Canva: Exportar PNG"
+    },
+    {
+      "parameters": {
+        "amount": 5,
+        "unit": "seconds"
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1,
+      "position": [3600, 4960],
+      "id": "sem-info-10",
+      "name": "Aguarda Export",
+      "webhookId": "sem-info-export-wait"
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "=https://api.canva.com/rest/v1/exports/{{ $('Canva: Exportar PNG').first().json.job.id }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "={{ 'Bearer ' + $vars.CANVA_ACCESS_TOKEN }}" }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [3824, 4960],
+      "id": "sem-info-11",
+      "name": "Canva: Busca URL PNG"
+    },
+    {
+      "parameters": {
+        "jsCode": "const exportJob = $input.first().json;\nconst urls = exportJob.job?.urls || [];\nconst imageUrl = urls[0] || '';\n\nreturn [{ json: { imageUrl, status: exportJob.job?.status } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [4048, 4960],
+      "id": "sem-info-12",
+      "name": "Extrai URL da Imagem"
+    }
+  ],
+  "connections": {
+    "Formata Data PT-BR": {
+      "main": [[{ "node": "Claude: Gera Dica", "type": "main", "index": 0 }]]
+    },
+    "Claude: Gera Dica": {
+      "main": [[{ "node": "Extrai Dica", "type": "main", "index": 0 }]]
+    },
+    "Extrai Dica": {
+      "main": [[{ "node": "Canva: Criar Design", "type": "main", "index": 0 }]]
+    },
+    "Canva: Criar Design": {
+      "main": [[{ "node": "Canva: Iniciar Edição", "type": "main", "index": 0 }]]
+    },
+    "Canva: Iniciar Edição": {
+      "main": [[{ "node": "Monta Contexto Edição", "type": "main", "index": 0 }]]
+    },
+    "Monta Contexto Edição": {
+      "main": [[{ "node": "Canva: Editar Textos", "type": "main", "index": 0 }]]
+    },
+    "Canva: Editar Textos": {
+      "main": [[{ "node": "Canva: Commit Edição", "type": "main", "index": 0 }]]
+    },
+    "Canva: Commit Edição": {
+      "main": [[{ "node": "Canva: Exportar PNG", "type": "main", "index": 0 }]]
+    },
+    "Canva: Exportar PNG": {
+      "main": [[{ "node": "Aguarda Export", "type": "main", "index": 0 }]]
+    },
+    "Aguarda Export": {
+      "main": [[{ "node": "Canva: Busca URL PNG", "type": "main", "index": 0 }]]
+    },
+    "Canva: Busca URL PNG": {
+      "main": [[{ "node": "Extrai URL da Imagem", "type": "main", "index": 0 }]]
+    }
+  },
+  "_conexao_entrada": "Conectar: IF Dia Útil? → saída FALSE (index 1) → Formata Data PT-BR",
+  "_proximos_passos": "Após 'Extrai URL da Imagem', adicionar nó Instagram Graph API para postar o Story"
+}
