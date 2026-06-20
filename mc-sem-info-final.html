@@ -14,11 +14,18 @@
     font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', sans-serif;
   }
 
-  /* 828×1792 escalado para 373×806 (45%) */
+  /*
+    Canvas Canva: 1080×1920 (9:16)
+    Escala de preview: 40% → 432×768px
+
+    Posições originais (1080×1920) × 0.4:
+      date → top: 282px × 0.4 = 113px  | centralizado
+      dica → top: 620px × 0.4 = 248px  | left: 73px × 0.4 = 29px
+  */
   .story {
     position: relative;
-    width: 373px;
-    height: 806px;
+    width: 432px;
+    height: 768px;
     overflow: hidden;
     border-radius: 12px;
     box-shadow: 0 0 0 1px #222, 0 24px 80px rgba(0,0,0,0.9);
@@ -30,28 +37,17 @@
     inset: 0;
     width: 100%;
     height: 100%;
-    object-fit: fill;
+    object-fit: cover;
   }
-
-  /*
-    Posições originais no Canva (1080×1920):
-      date → top: 282px, centralizado
-      dica → top: 620px, left: 73px
-
-    Escala para 828×1792 (proporção diferente):
-      date → top: ~14.7% → 118px em 806px de altura
-      dica → top: ~32.3% → 260px em 806px de altura
-      left dica → ~6.7% → 25px em 373px de largura
-  */
 
   .date {
     position: absolute;
-    top: 118px;
+    top: 113px;
     left: 0;
     right: 0;
     text-align: center;
     font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 400;
     color: #999;
     letter-spacing: 0.1px;
@@ -59,11 +55,11 @@
 
   .dica {
     position: absolute;
-    top: 260px;
-    left: 25px;
-    right: 25px;
+    top: 248px;
+    left: 29px;
+    right: 29px;
     font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 400;
     font-style: italic;
     color: #ddd;
