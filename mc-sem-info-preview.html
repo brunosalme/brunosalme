@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MC-sem_info Preview</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #1a1a1a; display: flex; justify-content: center; align-items: center; min-height: 100vh; font-family: 'Segoe UI', Arial, sans-serif; }
+
+  .story {
+    width: 360px;
+    height: 640px;
+    background: #000;
+    position: relative;
+    overflow: hidden;
+    border-radius: 12px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+  }
+
+  /* Faixa superior escura */
+  .top-bar {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 93px;
+    background: linear-gradient(180deg, #111 0%, #000 100%);
+    border-bottom: 1px solid #222;
+  }
+
+  /* Data */
+  .date {
+    position: absolute;
+    top: 28px;
+    left: 0; right: 0;
+    text-align: center;
+    font-size: 9.3px;
+    color: #888;
+    letter-spacing: 0.3px;
+  }
+
+  /* Linha separadora */
+  .separator {
+    position: absolute;
+    top: 93px;
+    left: 0; right: 0;
+    height: 1px;
+    background: #333;
+  }
+
+  /* Logo / ícone */
+  .logo-icon {
+    position: absolute;
+    top: 118px;
+    left: 24px;
+    width: 25px;
+    height: 25px;
+    font-size: 20px;
+    line-height: 1;
+  }
+
+  /* Título Morning Call */
+  .title {
+    position: absolute;
+    top: 118px;
+    left: 55px;
+    font-size: 28.5px;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -0.5px;
+    line-height: 1;
+  }
+
+  /* Linha separadora abaixo do título */
+  .separator-2 {
+    position: absolute;
+    top: 160px;
+    left: 0; right: 0;
+    height: 1px;
+    background: #333;
+  }
+
+  /* Texto principal */
+  .main-text {
+    position: absolute;
+    top: 171px;
+    left: 24px;
+    right: 24px;
+    font-size: 17.9px;
+    color: #fff;
+    font-weight: 400;
+    line-height: 1.4;
+  }
+
+  /* Emoji de polegar */
+  .thumb {
+    font-size: 16px;
+  }
+
+  /* Linha separadora da dica */
+  .separator-3 {
+    position: absolute;
+    top: 206px;
+    left: 0; right: 0;
+    height: 1px;
+    background: #333;
+  }
+
+  /* Dica */
+  .dica {
+    position: absolute;
+    top: 212px;
+    left: 24px;
+    right: 24px;
+    font-size: 16.8px;
+    color: #ccc;
+    font-style: italic;
+    line-height: 1.4;
+  }
+
+  /* Card de perfil */
+  .profile-card {
+    position: absolute;
+    bottom: 26px;
+    left: 55px;
+    right: 55px;
+    height: 59px;
+    background: #111;
+    border-radius: 30px;
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    gap: 10px;
+  }
+
+  .avatar-wrapper {
+    position: relative;
+    width: 41px;
+    height: 41px;
+    flex-shrink: 0;
+  }
+
+  .avatar-ring {
+    position: absolute;
+    inset: -2px;
+    border-radius: 50%;
+    background: conic-gradient(#f09433, #e6683c, #dc2743, #cc2366, #bc1888, #f09433);
+    z-index: 0;
+  }
+
+  .avatar {
+    position: absolute;
+    inset: 2px;
+    border-radius: 50%;
+    background: #333;
+    z-index: 1;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    color: #fff;
+    font-weight: 700;
+  }
+
+  .verified {
+    position: absolute;
+    bottom: -1px;
+    right: -1px;
+    width: 13px;
+    height: 13px;
+    background: #1877f2;
+    border-radius: 50%;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 7px;
+    color: #fff;
+  }
+
+  .profile-info {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+  }
+
+  .profile-name {
+    font-size: 13px;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1;
+  }
+
+  .profile-handle {
+    font-size: 9.8px;
+    color: #888;
+    line-height: 1;
+  }
+
+  /* Faixa inferior */
+  .bottom-bar {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 79px;
+    background: linear-gradient(0deg, #111 0%, #000 100%);
+    border-top: 1px solid #222;
+    z-index: -1;
+  }
+</style>
+</head>
+<body>
+
+<div class="story">
+  <div class="top-bar"></div>
+
+  <div class="date">20 de junho de 2026 às 09:00</div>
+
+  <div class="separator"></div>
+
+  <div class="logo-icon">☕</div>
+  <div class="title">Morning Call</div>
+
+  <div class="separator-2"></div>
+
+  <div class="main-text">
+    Hoje não tem informações de mercado. <span class="thumb">👍</span>
+  </div>
+
+  <div class="separator-3"></div>
+
+  <div class="dica">Dica: o mercado fecha, mas a geladeira não.</div>
+
+  <div class="bottom-bar"></div>
+
+  <div class="profile-card">
+    <div class="avatar-wrapper">
+      <div class="avatar-ring"></div>
+      <div class="avatar">BA</div>
+      <div class="verified">✓</div>
+    </div>
+    <div class="profile-info">
+      <div class="profile-name">Bruno Almeida</div>
+      <div class="profile-handle">@brunosalme</div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
